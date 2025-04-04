@@ -13,5 +13,6 @@ private:
 public:
 	static Storage* getInstance();
 	Polymon pickRandom();
+	std::vector<Polymon> getList();
 };
 

@@ -11,6 +11,7 @@ Storage* Storage::getInstance() {
 
 Storage::Storage() {
 	std::srand(std::time(0));
+	this->initData();
 };
 
 void Storage::initData() {
@@ -41,6 +42,13 @@ void Storage::initData() {
 };
 
 Polymon Storage::pickRandom() {
-	int r = std::rand() % this->db.size() + 1;
+	int r = -1;
+	while ((r < 0) or (r >= this->db.size())) {
+		r = std::rand() % this->db.size() + 1;
+	}
 	return this->db[r];
+};
+
+std::vector<Polymon> Storage::getList() {
+	return this->db;
 };
