@@ -7,11 +7,17 @@ Deux classes vous sont fournies :
 - Storage
 - Polymon
 
-Storage est une classe de stockage pour vos données. Pour notre exemple, nos Polymon seront stockés "en dur" dans le code.
-La classe Polymon sera à compléter. Vous aurez d'autres classes à réaliser.
+`Storage` est une classe de stockage pour vos données. Pour notre exemple, nos Polymon seront stockés "en dur" dans le code.
+La classe `Polymon` sera à compléter. Vous aurez d'autres classes à réaliser.
 
 > [!Note]
 > Tout votre code devra respecter les bonnes pratiques (encapsulation...) et être régulièrement mis à jour sur Github.
+> Votre dépôt devra être nommé `3aa-oo` et votre enseignant doit y être ajouté en tout début de l'activité.
+> Il est conseillé d'utiliser un `.gitignore` adapté.
+
+> [!Caution]
+> L'usage de votre poste personnel et d'Internet est autorisé.
+> La communication vers d'autres personnes et l'usage d'outils d'Intelligence Artificielle sont interdits.
 
 ## Description du jeu de base
 
@@ -27,6 +33,10 @@ La manche se termine quand la vie d'un des Polymon atteint zéro. A la fin de ch
 La partie se termine lorsque la vie du Polymon du joueur atteint zéro.
 
 ## Ajouts
+
+> [!Warning]
+> L'objectif est de réaliser un maximum d'éléments parmi les "Ajouts".
+> Le "jeu de base" n'est que la partie minimale pour pouvoir travailler.
 
 ### Coup critique
 
