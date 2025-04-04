@@ -3,7 +3,7 @@
 class Polymon
 {
 public:
-	Polymon(std::string name, int speed);
+	Polymon(std::string name, int speed, int hp);
 	void addAttack(std::string name, int points, int damage);
 };
 
