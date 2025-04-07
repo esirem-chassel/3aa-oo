@@ -12,6 +12,6 @@ private:
 	std::string _name;
 	int _speed;
 	int _hp;
-	std::vector<std::string> attaques = std::vector<std::string>();
+	std::vector<std::string> attacks = std::vector<std::string>();
 };
 
