@@ -57,7 +57,7 @@ Si une attaque d'un Element est réalisé contre un Polymon d'un élément qui l
 
 # CORRIGE
 
-## Complétion des classes et tests de base
+## 1.0 - Complétion des classes et tests de base
 
 On va commencer par compléter les classes qu'on a, et surtout : Polymon.
 On comprend de l'énoncé et du code qu'un Polymon a un nom, une speed, des HP et une liste d'attaques.
@@ -137,3 +137,109 @@ std::vector<std::string> Polymon::getAttacks() const {
 Pour le moment on n'implantera pas les setters,
 on ne devrait pas en avoir besoin de suite,
 et on ne va pas changer les HP n'importe comment.
+
+Testons notre programme principal,
+tout d'abord pour lister nos Polymon et leurs attaques.
+
+```cpp
+#include <iostream>
+#include "Storage.h"
+#include "Polymon.h"
+
+int main()
+{
+    std::cout << "P O L Y M O N" << std::endl;
+    std::vector<Polymon> ls = Storage::getInstance()->getList();
+    for (Polymon p : ls) {
+        std::cout << "" << p.getName() << " | Speed : " << p.getSpeed() << " | HP : " << p.getHp() << std::endl;
+        for (std::string atk : p.getAttacks()) {
+            std::cout << "|| " << atk << std::endl;
+        }
+    }
+}
+```
+
+Nous avons le minimum du minimum pour avancer.
+On peut déjà prévoir certains soucis qui vont apparaître (speed, attaques...) mais avançons.
+
+Créons d'abord la classe Game, comme demandé.
+Cette classe va retenir le Polymon choisi,
+ainsi que celui en cours d'affrontement,
+la manche en cours, etc.
+
+Comme on n'a pas besoin de pointeurs,
+on peut enregistrer un Polymon et non un Polymon*,
+mais C++ va refuser car aucun constructeur par défaut n'existe pour Polymon.
+
+Rajoutons-en un !
+Et assurons-nous que l'objet ne soit pas réellement utilisé,
+donc plaçons notre constructeur en default.
+
+```cpp
+class Polymon
+{
+public:
+	Polymon() = default;
+	Polymon(std::string name, int speed, int hp);
+```
+
+Puis notre déclaration de Game :
+
+```cpp
+#pragma once
+#include <iostream>
+#include "Storage.h"
+#include "Polymon.h"
+
+class Game
+{
+public:
+	Game();
+private:
+	Polymon _player;
+	Polymon _against;
+};
+```
+
+Et enfin une définition de base pour tester :
+```cpp
+#include "Game.h"
+
+Game::Game() {
+	// on demande d'abord à l'utilisateur son Polymon
+    std::vector<Polymon> ls = Storage::getInstance()->getList();
+    int choice;
+    int ix;
+    do {
+        ix = 0;
+        for (Polymon p : ls) {
+            std::cout << "[" << std::to_string(++ix) << "] " << p.getName() << std::endl;
+        }
+        std::cin >> choice;
+    } while ((choice <= 0) or (choice > ls.size()));
+    this->_player = ls[choice - 1];
+
+
+    this->_against = Storage::getInstance()->pickRandom();
+
+    std::cout << "Chosen one : " << this->_player.getName() << std::endl;
+    std::cout << "AGAINST : " << this->_against.getName() << std::endl;
+
+};
+```
+
+On peut désormais tester notre programme très facilement :
+
+```cpp
+#include <iostream>
+#include "Storage.h"
+#include "Polymon.h"
+#include "Game.h"
+
+int main()
+{
+    std::cout << "P O L Y M O N" << std::endl;
+    new Game();
+}
+```
+

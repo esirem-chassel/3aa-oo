@@ -5,6 +5,7 @@
 class Polymon
 {
 public:
+	Polymon() = default;
 	Polymon(std::string name, int speed, int hp);
 	void addAttack(std::string name, int points, int damage);
 	std::string getName() const;
