@@ -82,8 +82,58 @@ private:
 	std::string _name;
 	int _speed;
 	int _hp;
-	std::vector<std::string> attacks = std::vector<std::string>();
+	std::vector<std::string> _attacks = std::vector<std::string>();
 };
 ```
 
+Ensuite, complétons la partie cpp.
+Encore une fois, pour le moment, on considère les attaques comme une liste de strings, mais on changera ça à terme.
 
+```cpp
+Polymon::Polymon(std::string name, int speed, int hp) {
+	this->_name = name;
+	this->_speed = speed;
+	this->_hp = hp;
+};
+
+void Polymon::addAttack(std::string name, int points, int damage) {
+	this->_attacks.push_back(name);
+};
+
+std::string Polymon::getName() {
+	return this->_name;
+};
+```
+
+Maintenant, pour respecter le principe d'encapsulation, nous allons créer les accesseurs (getters et setters) de Polymon.
+
+Le .h d'abord, on indiquera d'ailleurs que les méthodes sont const, pour rester dans les bonnes pratiques.
+```cpp
+    std::string getName() const;
+	int getSpeed() const;
+	int getHp() const;
+	std::vector<std::string> getAttacks() const;
+```
+
+Puis le .cpp :
+```cpp
+std::string Polymon::getName() const {
+	return this->_name;
+};
+
+int Polymon::getSpeed() const {
+	return this->_speed;
+};
+
+int Polymon::getHp() const {
+	return this->_hp;
+};
+
+std::vector<std::string> Polymon::getAttacks() const {
+	return this->_attacks;
+};
+```
+
+Pour le moment on n'implantera pas les setters,
+on ne devrait pas en avoir besoin de suite,
+et on ne va pas changer les HP n'importe comment.

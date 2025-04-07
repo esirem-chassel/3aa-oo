@@ -7,11 +7,14 @@ class Polymon
 public:
 	Polymon(std::string name, int speed, int hp);
 	void addAttack(std::string name, int points, int damage);
-	std::string getName();
+	std::string getName() const;
+	int getSpeed() const;
+	int getHp() const;
+	std::vector<std::string> getAttacks() const;
 private:
 	std::string _name;
 	int _speed;
 	int _hp;
-	std::vector<std::string> attacks = std::vector<std::string>();
+	std::vector<std::string> _attacks = std::vector<std::string>();
 };
 
