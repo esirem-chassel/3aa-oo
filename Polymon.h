@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <vector>
+
 class Polymon
 {
 public:
@@ -8,5 +10,8 @@ public:
 	std::string getName();
 private:
 	std::string _name;
+	int _speed;
+	int _hp;
+	std::vector<std::string> attaques = std::vector<std::string>();
 };
 

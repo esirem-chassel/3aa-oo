@@ -55,3 +55,35 @@ Chaque Polymon possède un Element, et chaque Ability peut posséder un Element.
 Si une attaque d'un Element est réalisé contre un Polymon d'un élément qui lui est "faible" (ex: attaque de feu contre Polymon de glace), alors elle inflige 200% de dégâts.
 Si une attaque d'un Element est réalisé contre un Polymon d'un élément qui lui est "fort" (ex: attaque de feu contre Polymon d'eau), alors elle inflige 50% de dégâts.
 
+# CORRIGE
+
+## Complétion des classes et tests de base
+
+On va commencer par compléter les classes qu'on a, et surtout : Polymon.
+On comprend de l'énoncé et du code qu'un Polymon a un nom, une speed, des HP et une liste d'attaques.
+Commençons par le .h qui manque les informations suivantes :
+
+- speed, un entier
+- hp, un entier
+- attaques, une liste d'attaques
+
+Pour ce dernier point, il nous faudra une structure pour "retenir" chaque attaque.
+On va placer une string en attendant.
+
+```cpp
+
+class Polymon
+{
+public:
+	Polymon(std::string name, int speed, int hp);
+	void addAttack(std::string name, int points, int damage);
+	std::string getName();
+private:
+	std::string _name;
+	int _speed;
+	int _hp;
+	std::vector<std::string> attaques = std::vector<std::string>();
+};
+```
+
+
