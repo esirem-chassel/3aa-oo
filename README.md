@@ -243,3 +243,162 @@ int main()
 }
 ```
 
+On pourrait s'assurer qu'une seule instance de Game n'existe à un instant T
+pour éviter les soucis, en utilisant un pattern Singleton.
+On se garde l'idée pour plus tard.
+
+Notre objectif maintenant est de :
+- compléter la classe Game pour gérer les manches
+- compléter les éventuels manques d'autres classes
+- commencer à voir pour ajouter la partie "Ajouts"
+
+Commençons par une méthode `bool jouerManche()` qui nous permettra de jouer
+une manche et d'en retourner le résultat : `true` si le joueur gagne `false` sinon.
+On ajoute également sur le même principe `int jouerTour();` qui jouera le tour courant,
+et renverra 0 en cas de match nul, -1 en cas de défaite et 1 en cas de victoire.
+Chacune de ces méthodes mutera les objets `_player` et `_against`.
+
+Pour le moment, laissons les définitions de nos méthodes vides.
+Pour jouer un tour, nous aurons besoin de :
+- modifier les valeurs speed de nos Polymon
+- modifier les valeurs HP de nos Polymon
+
+Nous aurons donc besoin de setters,
+et nous aurons besoin d'une propriété pour stocker,
+sur un Polymon, son cumul de "speed" ou `_points`.
+
+On fera bien attention à définir `_points` à zéro dans le .h :
+c'est bien sa valeur de base et cela nous permet de conserver le constructeur tel quel.
+
+Créons nos différents setters spécialisés :
+```cpp
+    void stackSpeed(); // appellé en début de tour, pour cumuler des points
+	void usePoints(int pointsToUse); // usage des points
+	void damageTaken(int taken); // dégâts encaissés
+	void autoHeal(); // soins auto en fin de manche (10%)
+	void reset(); // appellé en début de manche, remet à zéro les points
+```
+
+Ainsi que leurs définitions :
+```cpp
+void Polymon::stackSpeed() {
+	this->_points += this->_speed;
+};
+
+// @TODO : what if not enough points ?
+void Polymon::usePoints(int pointsToUse) {
+	this->_points -= pointsToUse;
+};
+
+void Polymon::damageTaken(int taken) {
+	this->_hp -= taken;
+};
+
+void Polymon::autoHeal() {
+	this->_hp *= 1.1;
+};
+
+void Polymon::reset() {
+	this->_points = 0;
+};
+```
+
+On anticipe le souci des points insuffisants : on enverra une exception.
+
+Puis, on implémente les différentes méthodes dans Game, pour gérer :
+- chaque partie
+- chaque manche
+- chaque tour
+
+```cpp
+class Game
+{
+public:
+	Game();
+	void start();
+	bool jouerManche();
+	int jouerTour();
+private:
+	Polymon _player;
+	Polymon _against;
+	int _manche = 0;
+};
+```
+
+La méthode pour chaque tour s'occupe uniquement de ce qu'il se passe dans un tour.
+Pour le moment, nos attaques sont fictives.
+Donc nous allons effectuer un random pour obtenir des dégâts et points aléatoires.
+
+```cpp
+int Game::jouerTour() {
+    this->_player.stackSpeed();
+
+    int damageTaken = std::rand() % 500 + 1;
+    int damageDone = std::rand() % 500 + 1;
+
+    int pointsUsedPlayer = std::rand() % 20 + 1;
+    int pointsUsedAgainst = std::rand() % 20 + 1;
+
+    std::cout << "Vous prenez " << std::to_string(damageTaken) << " ! ";
+    this->_against.usePoints(pointsUsedAgainst);
+    this->_player.damageTaken(damageTaken);
+    std::cout << "(HP restants : " << std::to_string(this->_player.getHp()) << ")" << std::endl;
+    std::cout << "Vous infligez " << std::to_string(damageDone) << " ! ";
+    this->_player.usePoints(pointsUsedPlayer);
+    this->_against.damageTaken(damageDone);
+    std::cout << "(HP restants : " << std::to_string(this->_against.getHp()) << ")" << std::endl;
+
+    if (this->_player.getHp() <= 0) {
+        return -1;
+    }
+    else if (this->_against.getHp() <= 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+};
+```
+
+Ensuite, la méthode pour gérer chaque manche ne s'intéresse qu'au contenu d'une manche.
+C'est à dire le choix d'un Polymon adverse, le lancement des tours,
+le reset des points du Polymon joueur,
+ainsi que la conclusion de la manche.
+
+```cpp
+bool Game::jouerManche() {
+    bool r = false;
+    this->_manche++;
+    this->_player.reset();
+    this->_against = Storage::getInstance()->pickRandom();
+    std::cout << "Manche "
+              << std::to_string(this->_manche)
+              << " : " << this->_player.getName()
+              << " VS " << this->_against.getName() << std::endl;
+    int lastTourResult = 0;
+    while (lastTourResult == 0) {
+        lastTourResult = this->jouerTour();
+    }
+    if (lastTourResult < 0) {
+        std::cout << "Votre adversaire vous a mis KO !" << std::endl;
+        r = false; // perdu !
+    }
+    else {
+        std::cout << "Votre adversaire est KO !" << std::endl;
+        this->_player.autoHeal();
+        r = true; // gagne !
+    }
+    return r;
+};
+```
+
+On lancera la partie via la méthode start(), qui bouclera tant que le Polymon joueur est "debout".
+
+```cpp
+void Game::start() {
+    bool lastMancheResult = false;
+    do {
+        lastMancheResult = this->jouerManche();
+    } while (lastMancheResult);
+};
+```

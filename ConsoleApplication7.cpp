@@ -6,5 +6,6 @@
 int main()
 {
     std::cout << "P O L Y M O N" << std::endl;
-    new Game();
+    Game* g = new Game();
+    g->start();
 }

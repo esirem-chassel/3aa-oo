@@ -26,4 +26,24 @@ std::vector<std::string> Polymon::getAttacks() const {
 	return this->_attacks;
 };
 
+void Polymon::stackSpeed() {
+	this->_points += this->_speed;
+};
+
+// @TODO : what if not enough points ?
+void Polymon::usePoints(int pointsToUse) {
+	this->_points -= pointsToUse;
+};
+
+void Polymon::damageTaken(int taken) {
+	this->_hp -= taken;
+};
+
+void Polymon::autoHeal() {
+	this->_hp *= 1.1;
+};
+
+void Polymon::reset() {
+	this->_points = 0;
+};
 
