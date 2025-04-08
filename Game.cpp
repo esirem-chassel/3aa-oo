@@ -49,21 +49,47 @@ bool Game::jouerManche() {
 
 int Game::jouerTour() {
     this->_player.stackSpeed();
+    this->_against.stackSpeed();
 
-    int damageTaken = std::rand() % 500 + 1;
-    int damageDone = std::rand() % 500 + 1;
+    std::vector<Ability> playerAbilities = this->_player.getAttacks();
+    std::vector<Ability> foeAbilities = this->_against.getAttacks();
 
-    int pointsUsedPlayer = std::rand() % 20 + 1;
-    int pointsUsedAgainst = std::rand() % 20 + 1;
+    int indexPlayerAttack = -1;
+    while ((indexPlayerAttack < 0) or (indexPlayerAttack >= playerAbilities.size())) {
+        indexPlayerAttack = std::rand() % playerAbilities.size();
+    }
 
-    std::cout << "Vous prenez " << std::to_string(damageTaken) << " ! ";
-    this->_against.usePoints(pointsUsedAgainst);
-    this->_player.damageTaken(damageTaken);
-    std::cout << "(HP restants : " << std::to_string(this->_player.getHp()) << ")" << std::endl;
-    std::cout << "Vous infligez " << std::to_string(damageDone) << " ! ";
-    this->_player.usePoints(pointsUsedPlayer);
-    this->_against.damageTaken(damageDone);
-    std::cout << "(HP restants : " << std::to_string(this->_against.getHp()) << ")" << std::endl;
+    int indexFoeAttack = -1;
+    while ((indexFoeAttack < 0) or (indexFoeAttack >= foeAbilities.size())) {
+        indexFoeAttack = std::rand() % foeAbilities.size();
+    }
+
+    int pointsUsedPlayer = playerAbilities[indexPlayerAttack].getPoints();
+    int pointsUsedAgainst = foeAbilities[indexFoeAttack].getPoints();
+
+    try {
+        std::cout << "Votre adversaire utilise " << foeAbilities[indexFoeAttack].getName() << " !" << std::endl;
+        this->_against.usePoints(pointsUsedAgainst);
+        int damageTaken = foeAbilities[indexFoeAttack].getDamage();
+        std::cout << "Vous prenez " << std::to_string(damageTaken) << " ! ";
+        this->_player.damageTaken(damageTaken);
+        std::cout << "(HP restants : " << std::to_string(this->_player.getHp()) << ")" << std::endl;
+    }
+    catch (const std::range_error e) {
+        std::cout << "Le polymon adverse est a court d'energie (" << std::to_string(this->_against.getPoints()) << ") !" << std::endl;
+    }
+    
+    try {
+        std::cout << "Vous utilisez " << playerAbilities[indexPlayerAttack].getName() << " !" << std::endl;
+        this->_player.usePoints(pointsUsedPlayer);
+        int damageDone = playerAbilities[indexPlayerAttack].getDamage();
+        std::cout << "Vous infligez " << std::to_string(damageDone) << " ! ";
+        this->_against.damageTaken(damageDone);
+        std::cout << "(HP restants : " << std::to_string(this->_against.getHp()) << ")" << std::endl;
+    }
+    catch (const std::range_error e) {
+        std::cout << "Votre Polymon est a court d'energie (" << std::to_string(this->_player.getPoints()) << ") !" << std::endl;
+    }
 
     if (this->_player.getHp() <= 0) {
         return -1;

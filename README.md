@@ -402,3 +402,198 @@ void Game::start() {
     } while (lastMancheResult);
 };
 ```
+
+Avant de passer à l'implémentation réelle des attaques,
+nous allons régler ce que nous avions mis de coté : les points.
+Pour cela nous allons faire deux choses :
+- ajouter un getter pour le nombre de points
+- jeter une exception si les points qu'on veut dépenser sont au-dessus des points totaux
+
+*Par la suite, on réunira ces deux méthodes en une seule `tryAttack`.*
+
+Un exemple, pour le "jet" d'une exception:
+```cpp
+void Polymon::usePoints(int pointsToUse) {
+	if (pointsToUse <= this->_points) {
+		this->_points -= pointsToUse;
+	} else {
+		throw std::range_error("Not enough points !");
+	}
+};
+```
+
+On va ensuite modifier notre méthode `jouerTour()`
+pour prendre en compte la possibilité qu'on essaye de réaliser une action
+coûtant plus de points que possible.
+On constatera qu'on a oublié d'effectuer les mêmes opérations "de maintenance" sur le Polymon adverse,
+c'est à dire d'ajouter sa speed. On corrigera également ça.
+
+
+```cpp
+int Game::jouerTour() {
+    this->_player.stackSpeed();
+    this->_against.stackSpeed();
+
+    int pointsUsedPlayer = std::rand() % 20 + 1;
+    int pointsUsedAgainst = std::rand() % 20 + 1;
+
+    try {
+        this->_against.usePoints(pointsUsedAgainst);
+        int damageTaken = std::rand() % 500 + 1;
+        std::cout << "Vous prenez " << std::to_string(damageTaken) << " ! ";
+        this->_player.damageTaken(damageTaken);
+        std::cout << "(HP restants : " << std::to_string(this->_player.getHp()) << ")" << std::endl;
+    }
+    catch (const std::range_error e) {
+        std::cout << "Le polymon adverse est a court d'energie (" << std::to_string(this->_against.getPoints()) << ") !" << std::endl;
+    }
+    
+    try {
+        this->_player.usePoints(pointsUsedPlayer);
+        int damageDone = std::rand() % 500 + 1;
+        std::cout << "Vous infligez " << std::to_string(damageDone) << " ! ";
+        this->_against.damageTaken(damageDone);
+        std::cout << "(HP restants : " << std::to_string(this->_against.getHp()) << ")" << std::endl;
+    }
+    catch (const std::range_error e) {
+        std::cout << "Votre Polymon est a court d'energie (" << std::to_string(this->_player.getPoints()) << ") !" << std::endl;
+    }
+
+    if (this->_player.getHp() <= 0) {
+        return -1;
+    }
+    else if (this->_against.getHp() <= 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+};
+```
+
+A ce stade, nous avons réalisé la grande majorité de l'attendu en première partie.
+Ne reste que les attaques qui sont nécessaires pour permettre un choix.
+Pour cela, nous pouvons soit réaliser une structure dédiée,
+soit lire le reste de l'activité et voir que la classe Ability existe exprès pour ça.
+
+Créons donc une classe Ability avec des propriétés de base,
+ses accesseurs (getters uniquement), et changons notre liste d'attaques en liste d'abilities.
+
+Déclaration :
+```cpp
+class Ability
+{
+private:
+	std::string _name;
+	int _points;
+	int _damage;
+public:
+	Ability(std::string name, int points, int damage) : _name(name), _points(points), _damage(damage) {};
+	std::string getName();
+	int getPoints();
+	int getDamage();
+};
+```
+
+Définition :
+```cpp
+#include "Ability.h"
+
+std::string Ability::getName() {
+	return this->_name;
+};
+
+int Ability::getPoints() {
+	return this->_points;
+};
+
+int Ability::getDamage() {
+	return this->_damage;
+};
+```
+
+Extrait de la déclaration dans Polymon :
+```cpp
+private:
+	std::string _name;
+	int _speed;
+	int _hp;
+	int _points = 0;
+	std::vector<Ability> _attacks = std::vector<Ability>();
+```
+
+Méthode addAttack :
+```cpp
+void Polymon::addAttack(std::string name, int points, int damage) {
+	this->_attacks.push_back(Ability(name, points, damage));
+};
+```
+
+Evidemment, il faut également changer les différents accesseurs de Polymon qui concernent les attaques.
+
+Modifions notre Game pour qu'au lieu de choisir des valeurs aléatoires,
+on choisit une attaque aléatoire.
+
+```cpp
+int Game::jouerTour() {
+    this->_player.stackSpeed();
+    this->_against.stackSpeed();
+
+    std::vector<Ability> playerAbilities = this->_player.getAttacks();
+    std::vector<Ability> foeAbilities = this->_against.getAttacks();
+
+    int indexPlayerAttack = -1;
+    while ((indexPlayerAttack < 0) or (indexPlayerAttack >= playerAbilities.size())) {
+        indexPlayerAttack = std::rand() % playerAbilities.size();
+    }
+
+    int indexFoeAttack = -1;
+    while ((indexFoeAttack < 0) or (indexFoeAttack >= foeAbilities.size())) {
+        indexFoeAttack = std::rand() % foeAbilities.size();
+    }
+
+    int pointsUsedPlayer = playerAbilities[indexPlayerAttack].getPoints();
+    int pointsUsedAgainst = foeAbilities[indexFoeAttack].getPoints();
+
+    try {
+        std::cout << "Votre adversaire utilise " << foeAbilities[indexFoeAttack].getName() << " !" << std::endl;
+        this->_against.usePoints(pointsUsedAgainst);
+        int damageTaken = foeAbilities[indexFoeAttack].getDamage();
+        std::cout << "Vous prenez " << std::to_string(damageTaken) << " ! ";
+        this->_player.damageTaken(damageTaken);
+        std::cout << "(HP restants : " << std::to_string(this->_player.getHp()) << ")" << std::endl;
+    }
+    catch (const std::range_error e) {
+        std::cout << "Le polymon adverse est a court d'energie (" << std::to_string(this->_against.getPoints()) << ") !" << std::endl;
+    }
+    
+    try {
+        std::cout << "Vous utilisez " << playerAbilities[indexPlayerAttack].getName() << " !" << std::endl;
+        this->_player.usePoints(pointsUsedPlayer);
+        int damageDone = playerAbilities[indexPlayerAttack].getDamage();
+        std::cout << "Vous infligez " << std::to_string(damageDone) << " ! ";
+        this->_against.damageTaken(damageDone);
+        std::cout << "(HP restants : " << std::to_string(this->_against.getHp()) << ")" << std::endl;
+    }
+    catch (const std::range_error e) {
+        std::cout << "Votre Polymon est a court d'energie (" << std::to_string(this->_player.getPoints()) << ") !" << std::endl;
+    }
+
+    if (this->_player.getHp() <= 0) {
+        return -1;
+    }
+    else if (this->_against.getHp() <= 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+};
+```
+
+> [!Note]
+> Pour bien faire, on aurait pu créer une méthode pour choisir une attaque aléatoire
+> et la placer dans Polymon, ou même dans Game. Mais comme cette méthode sera bientôt
+> supprimée, et qu'elle ne nous sert qu'au debug...
+
+

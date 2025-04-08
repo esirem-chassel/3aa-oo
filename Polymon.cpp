@@ -7,7 +7,7 @@ Polymon::Polymon(std::string name, int speed, int hp) {
 };
 
 void Polymon::addAttack(std::string name, int points, int damage) {
-	this->_attacks.push_back(name);
+	this->_attacks.push_back(Ability(name, points, damage));
 };
 
 std::string Polymon::getName() const {
@@ -22,17 +22,24 @@ int Polymon::getHp() const {
 	return this->_hp;
 };
 
-std::vector<std::string> Polymon::getAttacks() const {
+std::vector<Ability> Polymon::getAttacks() const {
 	return this->_attacks;
+};
+
+int Polymon::getPoints() const {
+	return this->_points;
 };
 
 void Polymon::stackSpeed() {
 	this->_points += this->_speed;
 };
 
-// @TODO : what if not enough points ?
 void Polymon::usePoints(int pointsToUse) {
-	this->_points -= pointsToUse;
+	if (pointsToUse <= this->_points) {
+		this->_points -= pointsToUse;
+	} else {
+		throw std::range_error("Not enough points !");
+	}
 };
 
 void Polymon::damageTaken(int taken) {

@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <stdexcept>
 #include "Storage.h"
 #include "Polymon.h"
 
