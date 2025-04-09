@@ -54,3 +54,16 @@ void Polymon::reset() {
 	this->_points = 0;
 };
 
+Ability Polymon::getBestAbility() {
+	Ability* found = nullptr;
+	for (int i = this->_attacks.size() - 1; i >= 0; i--) {
+		if ((found == nullptr)
+			|| (this->_attacks[i].getDamage() > found->getDamage())) {
+			found = &this->_attacks[i];
+		}
+	}
+	if (found == nullptr) { // nothing found : get one randomly
+		found = &this->_attacks[0];
+	}
+	return *found;
+};

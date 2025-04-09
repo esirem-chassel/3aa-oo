@@ -9,8 +9,8 @@ private:
 	int _damage;
 public:
 	Ability(std::string name, int points, int damage) : _name(name), _points(points), _damage(damage) {};
-	std::string getName();
-	int getPoints();
-	int getDamage();
+	std::string getName() const;
+	int getPoints() const;
+	int getDamage() const;
 };
 

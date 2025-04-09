@@ -596,4 +596,60 @@ int Game::jouerTour() {
 > et la placer dans Polymon, ou même dans Game. Mais comme cette méthode sera bientôt
 > supprimée, et qu'elle ne nous sert qu'au debug...
 
+Maintenant, commençons le travail de choix des attaques.
+Le plus simple est probablement celui de l'ennemi,
+qui doit choisir la mailleure attaque possible.
+On va créer une méthode `getBestAbility()` sur un `Polymon`,
+renvoyant la meilleure attaque qu'il puisse porter avec ses points actuels.
+On en profitera pour ajouter les qualificatifs `const` sur les getters de `Ability`.
+
+> [!Information]
+> Parce qu'on joue avec des affectations de pointeurs dans `getBestAbility()`, celle-ci ne pourra pas être `const`.
+
+Déclaration :
+```cpp
+Ability getBestAbility();
+```
+
+Définition :
+```cpp
+Ability Polymon::getBestAbility() {
+	Ability* found = nullptr;
+	for (int i = this->_attacks.size() - 1; i >= 0; i--) {
+		if ((found == nullptr)
+			|| (this->_attacks[i].getDamage() > found->getDamage())) {
+			found = &this->_attacks[i];
+		}
+	}
+	if (found == nullptr) { // nothing found : get one randomly
+		found = &this->_attacks[0];
+	}
+	return *found;
+};
+```
+
+Code modifié pour la partie Ability adverse :
+```cpp
+Ability foeUsed = this->_against.getBestAbility();
+int pointsUsedAgainst = foeUsed.getPoints();
+try {
+    std::cout << "Votre adversaire utilise " << foeUsed.getName() << " !" << std::endl;
+    this->_against.usePoints(pointsUsedAgainst);
+    int damageTaken = foeUsed.getDamage();
+    std::cout << "Vous prenez " << std::to_string(damageTaken) << " ! ";
+    this->_player.damageTaken(damageTaken);
+    std::cout << "(HP restants : " << std::to_string(this->_player.getHp()) << ")" << std::endl;
+}
+catch (const std::range_error e) {
+    std::cout << "Le polymon adverse est a court d'energie ("
+        << std::to_string(this->_against.getPoints())
+        << " / "
+        << std::to_string(pointsUsedAgainst)
+        << ") !" << std::endl;
+}
+```
+
+> [!Note]
+> A partir de maintenant, je vais tricher et ajouter un nombre déraisonnable de HP à mon Polymon, afin de réaliser des tests plus complets.
+> Cela peut se faire avec un simple `this->_player.damageTaken(-10000); // on triche` à l'initialisation du `Game`.
 

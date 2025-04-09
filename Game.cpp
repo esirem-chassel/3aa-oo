@@ -13,6 +13,8 @@ Game::Game() {
         std::cin >> choice;
     } while ((choice <= 0) or (choice > ls.size()));
     this->_player = ls[choice - 1];
+
+    this->_player.damageTaken(-10000); // on triche
 };
 
 void Game::start() {
@@ -59,24 +61,25 @@ int Game::jouerTour() {
         indexPlayerAttack = std::rand() % playerAbilities.size();
     }
 
-    int indexFoeAttack = -1;
-    while ((indexFoeAttack < 0) or (indexFoeAttack >= foeAbilities.size())) {
-        indexFoeAttack = std::rand() % foeAbilities.size();
-    }
+    Ability foeUsed = this->_against.getBestAbility();
 
     int pointsUsedPlayer = playerAbilities[indexPlayerAttack].getPoints();
-    int pointsUsedAgainst = foeAbilities[indexFoeAttack].getPoints();
+    int pointsUsedAgainst = foeUsed.getPoints();
 
     try {
-        std::cout << "Votre adversaire utilise " << foeAbilities[indexFoeAttack].getName() << " !" << std::endl;
+        std::cout << "Votre adversaire utilise " << foeUsed.getName() << " !" << std::endl;
         this->_against.usePoints(pointsUsedAgainst);
-        int damageTaken = foeAbilities[indexFoeAttack].getDamage();
+        int damageTaken = foeUsed.getDamage();
         std::cout << "Vous prenez " << std::to_string(damageTaken) << " ! ";
         this->_player.damageTaken(damageTaken);
         std::cout << "(HP restants : " << std::to_string(this->_player.getHp()) << ")" << std::endl;
     }
     catch (const std::range_error e) {
-        std::cout << "Le polymon adverse est a court d'energie (" << std::to_string(this->_against.getPoints()) << ") !" << std::endl;
+        std::cout << "Le polymon adverse est a court d'energie ("
+            << std::to_string(this->_against.getPoints())
+            << " / "
+            << std::to_string(pointsUsedAgainst)
+            << ") !" << std::endl;
     }
     
     try {
@@ -88,7 +91,11 @@ int Game::jouerTour() {
         std::cout << "(HP restants : " << std::to_string(this->_against.getHp()) << ")" << std::endl;
     }
     catch (const std::range_error e) {
-        std::cout << "Votre Polymon est a court d'energie (" << std::to_string(this->_player.getPoints()) << ") !" << std::endl;
+        std::cout << "Votre Polymon est a court d'energie ("
+            << std::to_string(this->_player.getPoints())
+            << " / "
+            << std::to_string(pointsUsedPlayer)
+            << ") !" << std::endl;
     }
 
     if (this->_player.getHp() <= 0) {

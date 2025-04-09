@@ -20,6 +20,7 @@ public:
 	void usePoints(int pointsToUse);
 	void damageTaken(int taken);
 	void autoHeal();
+	Ability getBestAbility();
 private:
 	std::string _name;
 	int _speed;

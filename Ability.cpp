@@ -1,13 +1,13 @@
 #include "Ability.h"
 
-std::string Ability::getName() {
+std::string Ability::getName() const {
 	return this->_name;
 };
 
-int Ability::getPoints() {
+int Ability::getPoints() const {
 	return this->_points;
 };
 
-int Ability::getDamage() {
+int Ability::getDamage() const {
 	return this->_damage;
 };
