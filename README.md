@@ -59,6 +59,8 @@ Si une attaque d'un Element est réalisé contre un Polymon d'un élément qui l
 
 ## 1.0 - Complétion des classes et tests de base
 
+### 1.1 - Polymon
+
 On va commencer par compléter les classes qu'on a, et surtout : Polymon.
 On comprend de l'énoncé et du code qu'un Polymon a un nom, une speed, des HP et une liste d'attaques.
 Commençons par le .h qui manque les informations suivantes :
@@ -138,6 +140,8 @@ Pour le moment on n'implantera pas les setters,
 on ne devrait pas en avoir besoin de suite,
 et on ne va pas changer les HP n'importe comment.
 
+### 1.2 - Test de base
+
 Testons notre programme principal,
 tout d'abord pour lister nos Polymon et leurs attaques.
 
@@ -162,6 +166,10 @@ int main()
 Nous avons le minimum du minimum pour avancer.
 On peut déjà prévoir certains soucis qui vont apparaître (speed, attaques...) mais avançons.
 
+## 2.0 - Le jeu
+
+### 2.1 - Bases du Game
+
 Créons d'abord la classe Game, comme demandé.
 Cette classe va retenir le Polymon choisi,
 ainsi que celui en cours d'affrontement,
@@ -170,6 +178,8 @@ la manche en cours, etc.
 Comme on n'a pas besoin de pointeurs,
 on peut enregistrer un Polymon et non un Polymon*,
 mais C++ va refuser car aucun constructeur par défaut n'existe pour Polymon.
+
+### 2.2 - Polymon (constructeur par défaut)
 
 Rajoutons-en un !
 Et assurons-nous que l'objet ne soit pas réellement utilisé,
@@ -182,6 +192,8 @@ public:
 	Polymon() = default;
 	Polymon(std::string name, int speed, int hp);
 ```
+
+### 2.3 - Classe Game
 
 Puis notre déclaration de Game :
 
@@ -247,6 +259,10 @@ On pourrait s'assurer qu'une seule instance de Game n'existe à un instant T
 pour éviter les soucis, en utilisant un pattern Singleton.
 On se garde l'idée pour plus tard.
 
+## 3.0 - Avancée de Game
+
+### 3.1 - Préparation
+
 Notre objectif maintenant est de :
 - compléter la classe Game pour gérer les manches
 - compléter les éventuels manques d'autres classes
@@ -262,6 +278,8 @@ Pour le moment, laissons les définitions de nos méthodes vides.
 Pour jouer un tour, nous aurons besoin de :
 - modifier les valeurs speed de nos Polymon
 - modifier les valeurs HP de nos Polymon
+
+### 3.2 - Modifications sur Polymon
 
 Nous aurons donc besoin de setters,
 et nous aurons besoin d'une propriété pour stocker,
@@ -303,7 +321,9 @@ void Polymon::reset() {
 };
 ```
 
-On anticipe le souci des points insuffisants : on enverra une exception.
+On anticipe le souci des points insuffisants : on renverra une exception quand on y sera.
+
+### 3.3 - Implémentation dans Game
 
 Puis, on implémente les différentes méthodes dans Game, pour gérer :
 - chaque partie
@@ -403,13 +423,17 @@ void Game::start() {
 };
 ```
 
+## 4.0 - Attaques et points
+
+### 4.1 - Pas assez de points !
+
 Avant de passer à l'implémentation réelle des attaques,
 nous allons régler ce que nous avions mis de coté : les points.
 Pour cela nous allons faire deux choses :
 - ajouter un getter pour le nombre de points
 - jeter une exception si les points qu'on veut dépenser sont au-dessus des points totaux
 
-*Par la suite, on réunira ces deux méthodes en une seule `tryAttack`.*
+*Par la suite, on pourrait réunir ces deux méthodes en une seule `tryAttack`.*
 
 Un exemple, pour le "jet" d'une exception:
 ```cpp
@@ -470,6 +494,8 @@ int Game::jouerTour() {
     }
 };
 ```
+
+### 4.2 - Attaques / Ability
 
 A ce stade, nous avons réalisé la grande majorité de l'attendu en première partie.
 Ne reste que les attaques qui sont nécessaires pour permettre un choix.
@@ -596,6 +622,8 @@ int Game::jouerTour() {
 > et la placer dans Polymon, ou même dans Game. Mais comme cette méthode sera bientôt
 > supprimée, et qu'elle ne nous sert qu'au debug...
 
+### 4.3 - Choix de l'attaque par l'ennemi
+
 Maintenant, commençons le travail de choix des attaques.
 Le plus simple est probablement celui de l'ennemi,
 qui doit choisir la mailleure attaque possible.
@@ -603,7 +631,7 @@ On va créer une méthode `getBestAbility()` sur un `Polymon`,
 renvoyant la meilleure attaque qu'il puisse porter avec ses points actuels.
 On en profitera pour ajouter les qualificatifs `const` sur les getters de `Ability`.
 
-> [!Information]
+> [!Warning]
 > Parce qu'on joue avec des affectations de pointeurs dans `getBestAbility()`, celle-ci ne pourra pas être `const`.
 
 Déclaration :
@@ -652,4 +680,130 @@ catch (const std::range_error e) {
 > [!Note]
 > A partir de maintenant, je vais tricher et ajouter un nombre déraisonnable de HP à mon Polymon, afin de réaliser des tests plus complets.
 > Cela peut se faire avec un simple `this->_player.damageTaken(-10000); // on triche` à l'initialisation du `Game`.
+
+### 4.4 - Choix de l'attaque par le joueur
+
+Il ne me reste plus qu'à ajouter le choix de l'utilisateur quant à l'action qu'il souhaite effectuer.
+On va ajouter une méthode `playerTurn()`.
+On va aussi en profiter pour "déporter" la partie de l'adversaire dans une méthode dédiée.
+Comme ces méthodes n'ont pour vocation que d'être appellées par `Game`,
+nous allons les placer en privé.
+
+```cpp
+class Game
+{
+public:
+	Game();
+	void start();
+	bool jouerManche();
+	int jouerTour();
+private:
+	Polymon _player;
+	Polymon _against;
+	int _manche = 0;
+	void playerTurn();
+    void foeTurn();
+};
+```
+
+On modifie `Game` pour alléger la partie `jouerTour` :
+
+```cpp
+int Game::jouerTour() {
+    this->_player.stackSpeed();
+    this->_against.stackSpeed();
+
+    this->playerTurn();
+    this->foeTurn();
+
+    if (this->_player.getHp() <= 0) {
+        return -1;
+    }
+    else if (this->_against.getHp() <= 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+};
+```
+
+Et on complète le tour du joueur !
+
+```cpp
+void Game::playerTurn() {
+    std::vector<Ability> playerAbilities = this->_player.getAttacks();
+    int userChoice = -1;
+
+    do {
+        std::cout << "Selectionnez votre attaque (" << this->_player.getPoints() << " SP disponibles) :" << std::endl;
+        int ix = 0;
+        std::cout << "[-1] Passer" << std::endl;
+        for (Ability a : playerAbilities) {
+            if (a.getPoints() <= this->_player.getPoints()) {
+                std::cout << "[ " << std::to_string(ix) << "] " << a.getName() << "(" << a.getPoints() << ")" << std::endl;
+            }
+            ix++;
+        }
+        std::cin >> userChoice;
+    } while ((userChoice > 0) && (userChoice > playerAbilities.size()));
+    if (userChoice >= 0) {
+        Ability playerUsed = playerAbilities[userChoice];
+        int pointsUsedPlayer = playerUsed.getPoints();
+
+        try {
+            std::cout << "Vous utilisez " << playerUsed.getName() << " !" << std::endl;
+            this->_player.usePoints(pointsUsedPlayer);
+            int damageDone = playerUsed.getDamage();
+            std::cout << "Vous infligez " << std::to_string(damageDone) << " ! ";
+            this->_against.damageTaken(damageDone);
+            std::cout << "(HP restants : " << std::to_string(this->_against.getHp()) << ")" << std::endl;
+        }
+        catch (const std::range_error e) { // should never happen !
+            std::cout << "Votre Polymon est a court d'energie ("
+                << std::to_string(this->_player.getPoints())
+                << " / "
+                << std::to_string(pointsUsedPlayer)
+                << ") !" << std::endl;
+        }
+    }
+};
+```
+
+> [!Note]
+> On a pris le parti ici de "limiter" les possibilités du joueur, qui ne peut donc pas choisir une attaque dont les points dépassent ceux accumulés.
+> Mais on a pu voir qu'on peut gérer ce cas également.
+> Idéalement, on peut donc supprimer la partie qui "intercepte" l'exception pour le joueur.
+> Cela reste néanmoins la pratique à suivre d'intercepter toute exception imaginable.
+
+## 5.0 - La suite
+
+### 5.1 - Cohérence
+
+Il reste un point d'amélioration : l'ennemi continue à attaquer, même si ses HPs sont à zéro.
+Qu'à cela ne tienne :
+```cpp
+int Game::jouerTour() {
+    this->_player.stackSpeed();
+    this->_against.stackSpeed();
+
+    this->playerTurn();
+    if (this->_against.getHp() <= 0) {
+        this->foeTurn();
+    }
+
+    if (this->_player.getHp() <= 0) {
+        return -1;
+    }
+    else if (this->_against.getHp() <= 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+};
+```
+
+Des éléments sont améliorables, mais nous avons réalisé l'intégralité de la partie du jeu de base.
+
 

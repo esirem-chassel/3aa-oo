@@ -53,17 +53,63 @@ int Game::jouerTour() {
     this->_player.stackSpeed();
     this->_against.stackSpeed();
 
-    std::vector<Ability> playerAbilities = this->_player.getAttacks();
-    std::vector<Ability> foeAbilities = this->_against.getAttacks();
-
-    int indexPlayerAttack = -1;
-    while ((indexPlayerAttack < 0) or (indexPlayerAttack >= playerAbilities.size())) {
-        indexPlayerAttack = std::rand() % playerAbilities.size();
+    this->playerTurn();
+    if (this->_against.getHp() <= 0) {
+        this->foeTurn();
     }
 
-    Ability foeUsed = this->_against.getBestAbility();
+    if (this->_player.getHp() <= 0) {
+        return -1;
+    }
+    else if (this->_against.getHp() <= 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+};
 
-    int pointsUsedPlayer = playerAbilities[indexPlayerAttack].getPoints();
+void Game::playerTurn() {
+    std::vector<Ability> playerAbilities = this->_player.getAttacks();
+    int userChoice = -1;
+
+    do {
+        std::cout << "Selectionnez votre attaque (" << this->_player.getPoints() << " SP disponibles) :" << std::endl;
+        int ix = 0;
+        std::cout << "[-1] Passer" << std::endl;
+        for (Ability a : playerAbilities) {
+            if (a.getPoints() <= this->_player.getPoints()) {
+                std::cout << "[ " << std::to_string(ix) << "] " << a.getName() << "(" << a.getPoints() << ")" << std::endl;
+            }
+            ix++;
+        }
+        std::cin >> userChoice;
+    } while ((userChoice > 0) && (userChoice > playerAbilities.size()));
+    if (userChoice >= 0) {
+        Ability playerUsed = playerAbilities[userChoice];
+        int pointsUsedPlayer = playerUsed.getPoints();
+
+        try {
+            std::cout << "Vous utilisez " << playerUsed.getName() << " !" << std::endl;
+            this->_player.usePoints(pointsUsedPlayer);
+            int damageDone = playerUsed.getDamage();
+            std::cout << "Vous infligez " << std::to_string(damageDone) << " ! ";
+            this->_against.damageTaken(damageDone);
+            std::cout << "(HP restants : " << std::to_string(this->_against.getHp()) << ")" << std::endl;
+        }
+        catch (const std::range_error e) { // should never happen !
+            std::cout << "Votre Polymon est a court d'energie ("
+                << std::to_string(this->_player.getPoints())
+                << " / "
+                << std::to_string(pointsUsedPlayer)
+                << ") !" << std::endl;
+        }
+    }
+};
+
+void Game::foeTurn() {
+    std::vector<Ability> foeAbilities = this->_against.getAttacks();
+    Ability foeUsed = this->_against.getBestAbility();
     int pointsUsedAgainst = foeUsed.getPoints();
 
     try {
@@ -80,31 +126,5 @@ int Game::jouerTour() {
             << " / "
             << std::to_string(pointsUsedAgainst)
             << ") !" << std::endl;
-    }
-    
-    try {
-        std::cout << "Vous utilisez " << playerAbilities[indexPlayerAttack].getName() << " !" << std::endl;
-        this->_player.usePoints(pointsUsedPlayer);
-        int damageDone = playerAbilities[indexPlayerAttack].getDamage();
-        std::cout << "Vous infligez " << std::to_string(damageDone) << " ! ";
-        this->_against.damageTaken(damageDone);
-        std::cout << "(HP restants : " << std::to_string(this->_against.getHp()) << ")" << std::endl;
-    }
-    catch (const std::range_error e) {
-        std::cout << "Votre Polymon est a court d'energie ("
-            << std::to_string(this->_player.getPoints())
-            << " / "
-            << std::to_string(pointsUsedPlayer)
-            << ") !" << std::endl;
-    }
-
-    if (this->_player.getHp() <= 0) {
-        return -1;
-    }
-    else if (this->_against.getHp() <= 0) {
-        return 1;
-    }
-    else {
-        return 0;
     }
 };

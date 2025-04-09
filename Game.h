@@ -15,5 +15,7 @@ private:
 	Polymon _player;
 	Polymon _against;
 	int _manche = 0;
+	void playerTurn();
+	void foeTurn();
 };
 
