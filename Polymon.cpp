@@ -7,7 +7,11 @@ Polymon::Polymon(std::string name, int speed, int hp) {
 };
 
 void Polymon::addAttack(std::string name, int points, int damage) {
-	this->_attacks.push_back(Ability(name, points, damage));
+	this->_attacks.push_back(new Ability(name, points, damage));
+};
+
+void Polymon::addUltimate(std::string name, int points, int damage) {
+	this->_attacks.push_back(new Ultimate(name, points, damage));
 };
 
 std::string Polymon::getName() const {
@@ -22,7 +26,7 @@ int Polymon::getHp() const {
 	return this->_hp;
 };
 
-std::vector<Ability> Polymon::getAttacks() const {
+std::vector<Ability*> Polymon::getAttacks() const {
 	return this->_attacks;
 };
 
@@ -54,16 +58,16 @@ void Polymon::reset() {
 	this->_points = 0;
 };
 
-Ability Polymon::getBestAbility() {
+Ability* Polymon::getBestAbility() {
 	Ability* found = nullptr;
 	for (int i = this->_attacks.size() - 1; i >= 0; i--) {
 		if ((found == nullptr)
-			|| (this->_attacks[i].getDamage() > found->getDamage())) {
-			found = &this->_attacks[i];
+			|| (this->_attacks[i]->getDamage() > found->getDamage())) {
+			found = this->_attacks[i];
 		}
 	}
 	if (found == nullptr) { // nothing found : get one randomly
-		found = &this->_attacks[0];
+		found = this->_attacks[0];
 	}
-	return *found;
+	return found;
 };

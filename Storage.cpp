@@ -23,6 +23,7 @@ void Storage::initData() {
 	Polymon air = Polymon("Phew", 25, 600);
 	feu.addAttack("Fire fire", 20, 100);
 	feu.addAttack("Light the fire", 100, 600);
+	feu.addUltimate("TOUCRAMER", 200, 2000);
 	glace.addAttack("Fepacho", 10, 100);
 	glace.addAttack("Aglagla", 80, 900);
 	eau.addAttack("Plouf", 15, 100);

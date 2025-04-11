@@ -11,3 +11,7 @@ int Ability::getPoints() const {
 int Ability::getDamage() const {
 	return this->_damage;
 };
+
+bool Ability::canCrit() const {
+	return true;
+};

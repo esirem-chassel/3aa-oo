@@ -70,44 +70,43 @@ int Game::jouerTour() {
 };
 
 void Game::playerTurn() {
-    std::vector<Ability> playerAbilities = this->_player.getAttacks();
+    std::vector<Ability*> playerAbilities = this->_player.getAttacks();
     int userChoice = -1;
 
     do {
         std::cout << "Selectionnez votre attaque (" << this->_player.getPoints() << " SP disponibles) :" << std::endl;
         int ix = 0;
         std::cout << "[-1] Passer" << std::endl;
-        for (Ability a : playerAbilities) {
-            if (a.getPoints() <= this->_player.getPoints()) {
-                std::cout << "[ " << std::to_string(ix) << "] " << a.getName() << "(" << a.getPoints() << ")" << std::endl;
+        for (Ability* a : playerAbilities) {
+            if (a->getPoints() <= this->_player.getPoints()) {
+                std::cout << "[ " << std::to_string(ix) << "] " << a->getName() << "(" << a->getPoints() << ")" << std::endl;
             }
             ix++;
         }
         std::cin >> userChoice;
     } while ((userChoice > 0) && (userChoice > playerAbilities.size()));
     if (userChoice >= 0) {
-        Ability playerUsed = playerAbilities[userChoice];
+        Ability* playerUsed = playerAbilities[userChoice];
         this->tryAttack(&this->_player, &this->_against, playerUsed, false);
     }
 };
 
 void Game::foeTurn() {
-    std::vector<Ability> foeAbilities = this->_against.getAttacks();
-    Ability foeUsed = this->_against.getBestAbility();
+    Ability* foeUsed = this->_against.getBestAbility();
     this->tryAttack(&this->_against, &this->_player, foeUsed, true);
 };
 
-void Game::tryAttack(Polymon* src, Polymon* trg, Ability attack, bool foeAgainstPlayer) {
+void Game::tryAttack(Polymon* src, Polymon* trg, Ability* attack, bool foeAgainstPlayer) {
     std::string srcName = foeAgainstPlayer ? "Le polymon adverse" : "Votre polymon";
     std::string trgName = foeAgainstPlayer ? "Votre polymon" : "Le polymon adverse";
 
-    int pointsUsed = attack.getPoints();
-    bool isCrit = (5 >= (std::rand() % 100 + 1));
+    int pointsUsed = attack->getPoints();
+    bool isCrit = attack->canCrit() && (5 >= (std::rand() % 100 + 1));
 
     try {
-        std::cout << srcName << " utilise " << attack.getName() << " !" << std::endl;
+        std::cout << srcName << " utilise " << attack->getName() << " !" << std::endl;
         src->usePoints(pointsUsed);
-        int damageTaken = attack.getDamage();
+        int damageTaken = attack->getDamage();
         if (isCrit) {
             std::cout << "Coup critique ! ";
             damageTaken *= 1.5;

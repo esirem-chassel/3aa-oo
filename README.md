@@ -875,3 +875,78 @@ void Game::tryAttack(Polymon* src, Polymon* trg, Ability attack, bool foeAgainst
 };
 ```
 
+### 6.2 - Ultimate
+
+Rajoutons donc notre classe `Ultimate`.
+Celle-ci est une `Ability`, mais sans possibilité de coup critique, et sans élément.
+Héritons donc `Ultimate` d'`Ability`, et déplaçons nos éléments pertinents dans `protected`.
+On ajoutera ensuite une méthode `canCrit` sur Ability.
+
+> [!Warning]
+> Parce que nous effectuons un héritage, certains précautions s'imposent.
+> - un constructeur par défaut doit être placé sur la classe parente
+> - de la même manière, un constructeur devra exister pour `Ultimate`
+> - pour éviter le "slicing", nous devons stocker des pointeurs sur Ability et non plus des Ability
+> - cela implique de modifier TOUTES les méthodes utilisant des `Ability` venues de `Polymon` !
+
+Déclaration :
+```cpp
+#pragma once
+#include "Ability.h"
+
+class Ultimate : public Ability
+{
+public:
+	Ultimate(std::string name, int points, int damage);
+	bool canCrit() const override;
+};
+```
+
+Nous devons également ajouter une nouvelle factory dans `Polymon` :
+```cpp
+void addUltimate(std::string name, int points, int damage);
+```
+
+Extrait de définition de `Polymon` :
+```cpp
+void Polymon::addAttack(std::string name, int points, int damage) {
+	this->_attacks.push_back(new Ability(name, points, damage));
+};
+
+void Polymon::addUltimate(std::string name, int points, int damage) {
+	this->_attacks.push_back(new Ultimate(name, points, damage));
+};
+```
+
+Enfin, nous appliquons la modification, dans `tryAttack` :
+```cpp
+void Game::tryAttack(Polymon* src, Polymon* trg, Ability* attack, bool foeAgainstPlayer) {
+    std::string srcName = foeAgainstPlayer ? "Le polymon adverse" : "Votre polymon";
+    std::string trgName = foeAgainstPlayer ? "Votre polymon" : "Le polymon adverse";
+
+    int pointsUsed = attack->getPoints();
+    bool isCrit = attack->canCrit() && (5 >= (std::rand() % 100 + 1));
+
+    try {
+        std::cout << srcName << " utilise " << attack->getName() << " !" << std::endl;
+        src->usePoints(pointsUsed);
+        int damageTaken = attack->getDamage();
+        if (isCrit) {
+            std::cout << "Coup critique ! ";
+            damageTaken *= 1.5;
+        }
+        std::cout << trgName << " prends " << std::to_string(damageTaken) << " ! ";
+        trg->damageTaken(damageTaken);
+        std::cout << "(HP restants : " << std::to_string(trg->getHp()) << ")" << std::endl;
+    }
+    catch (const std::range_error e) {
+        std::cout << srcName << " est a court d'energie ("
+            << std::to_string(src->getPoints())
+            << " / "
+            << std::to_string(pointsUsed)
+            << ") !" << std::endl;
+    }
+};
+```
+
+

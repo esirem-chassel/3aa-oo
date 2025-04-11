@@ -3,7 +3,8 @@
 
 class Ability
 {
-private:
+protected:
+	Ability() = default;
 	std::string _name;
 	int _points;
 	int _damage;
@@ -12,5 +13,6 @@ public:
 	std::string getName() const;
 	int getPoints() const;
 	int getDamage() const;
+	virtual bool canCrit() const;
 };
 
