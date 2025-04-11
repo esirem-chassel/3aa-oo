@@ -844,3 +844,34 @@ void Game::tryAttack(Polymon* src, Polymon* trg, Ability attack, bool foeAgainst
 
 5% de chances de réussite signifie que sur un nombre aléatoire de 0 à 100, 5 ou moins est un succès.
 Modifions notre méthode !
+
+```cpp
+void Game::tryAttack(Polymon* src, Polymon* trg, Ability attack, bool foeAgainstPlayer) {
+    std::string srcName = foeAgainstPlayer ? "Le polymon adverse" : "Votre polymon";
+    std::string trgName = foeAgainstPlayer ? "Votre polymon" : "Le polymon adverse";
+
+    int pointsUsed = attack.getPoints();
+    bool isCrit = (5 >= (std::rand() % 100 + 1));
+
+    try {
+        std::cout << srcName << " utilise " << attack.getName() << " !" << std::endl;
+        src->usePoints(pointsUsed);
+        int damageTaken = attack.getDamage();
+        if (isCrit) {
+            std::cout << "Coup critique ! ";
+            damageTaken *= 1.5;
+        }
+        std::cout << trgName << " prends " << std::to_string(damageTaken) << " ! ";
+        trg->damageTaken(damageTaken);
+        std::cout << "(HP restants : " << std::to_string(trg->getHp()) << ")" << std::endl;
+    }
+    catch (const std::range_error e) {
+        std::cout << srcName << " est a court d'energie ("
+            << std::to_string(src->getPoints())
+            << " / "
+            << std::to_string(pointsUsed)
+            << ") !" << std::endl;
+    }
+};
+```
+

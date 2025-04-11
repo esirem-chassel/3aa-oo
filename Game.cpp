@@ -102,11 +102,16 @@ void Game::tryAttack(Polymon* src, Polymon* trg, Ability attack, bool foeAgainst
     std::string trgName = foeAgainstPlayer ? "Votre polymon" : "Le polymon adverse";
 
     int pointsUsed = attack.getPoints();
+    bool isCrit = (5 >= (std::rand() % 100 + 1));
 
     try {
         std::cout << srcName << " utilise " << attack.getName() << " !" << std::endl;
         src->usePoints(pointsUsed);
         int damageTaken = attack.getDamage();
+        if (isCrit) {
+            std::cout << "Coup critique ! ";
+            damageTaken *= 1.5;
+        }
         std::cout << trgName << " prends " << std::to_string(damageTaken) << " ! ";
         trg->damageTaken(damageTaken);
         std::cout << "(HP restants : " << std::to_string(trg->getHp()) << ")" << std::endl;
