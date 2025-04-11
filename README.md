@@ -59,7 +59,7 @@ Si une attaque d'un Element est réalisé contre un Polymon d'un élément qui l
 
 ## 1.0 - Complétion des classes et tests de base
 
-### 1.1 - Polymon
+### 1.1 - Polymon ⏲️ 15m
 
 On va commencer par compléter les classes qu'on a, et surtout : Polymon.
 On comprend de l'énoncé et du code qu'un Polymon a un nom, une speed, des HP et une liste d'attaques.
@@ -140,7 +140,7 @@ Pour le moment on n'implantera pas les setters,
 on ne devrait pas en avoir besoin de suite,
 et on ne va pas changer les HP n'importe comment.
 
-### 1.2 - Test de base
+### 1.2 - Test de base ⏲️ 5m
 
 Testons notre programme principal,
 tout d'abord pour lister nos Polymon et leurs attaques.
@@ -168,7 +168,7 @@ On peut déjà prévoir certains soucis qui vont apparaître (speed, attaques...
 
 ## 2.0 - Le jeu
 
-### 2.1 - Bases du Game
+### 2.1 - Bases du Game ⏲️ 5m
 
 Créons d'abord la classe Game, comme demandé.
 Cette classe va retenir le Polymon choisi,
@@ -179,7 +179,7 @@ Comme on n'a pas besoin de pointeurs,
 on peut enregistrer un Polymon et non un Polymon*,
 mais C++ va refuser car aucun constructeur par défaut n'existe pour Polymon.
 
-### 2.2 - Polymon (constructeur par défaut)
+### 2.2 - Polymon (constructeur par défaut) ⏲️ 5m
 
 Rajoutons-en un !
 Et assurons-nous que l'objet ne soit pas réellement utilisé,
@@ -193,7 +193,7 @@ public:
 	Polymon(std::string name, int speed, int hp);
 ```
 
-### 2.3 - Classe Game
+### 2.3 - Classe Game ⏲️ 10m
 
 Puis notre déclaration de Game :
 
@@ -261,7 +261,7 @@ On se garde l'idée pour plus tard.
 
 ## 3.0 - Avancée de Game
 
-### 3.1 - Préparation
+### 3.1 - Préparation ⏲️ 5m
 
 Notre objectif maintenant est de :
 - compléter la classe Game pour gérer les manches
@@ -279,7 +279,7 @@ Pour jouer un tour, nous aurons besoin de :
 - modifier les valeurs speed de nos Polymon
 - modifier les valeurs HP de nos Polymon
 
-### 3.2 - Modifications sur Polymon
+### 3.2 - Modifications sur Polymon ⏲️ 10m
 
 Nous aurons donc besoin de setters,
 et nous aurons besoin d'une propriété pour stocker,
@@ -323,7 +323,7 @@ void Polymon::reset() {
 
 On anticipe le souci des points insuffisants : on renverra une exception quand on y sera.
 
-### 3.3 - Implémentation dans Game
+### 3.3 - Implémentation dans Game ⏲️ 20m
 
 Puis, on implémente les différentes méthodes dans Game, pour gérer :
 - chaque partie
@@ -425,7 +425,7 @@ void Game::start() {
 
 ## 4.0 - Attaques et points
 
-### 4.1 - Pas assez de points !
+### 4.1 - Pas assez de points ! ⏲️ 10m
 
 Avant de passer à l'implémentation réelle des attaques,
 nous allons régler ce que nous avions mis de coté : les points.
@@ -495,7 +495,7 @@ int Game::jouerTour() {
 };
 ```
 
-### 4.2 - Attaques / Ability
+### 4.2 - Attaques / Ability ⏲️ 15m
 
 A ce stade, nous avons réalisé la grande majorité de l'attendu en première partie.
 Ne reste que les attaques qui sont nécessaires pour permettre un choix.
@@ -622,7 +622,7 @@ int Game::jouerTour() {
 > et la placer dans Polymon, ou même dans Game. Mais comme cette méthode sera bientôt
 > supprimée, et qu'elle ne nous sert qu'au debug...
 
-### 4.3 - Choix de l'attaque par l'ennemi
+### 4.3 - Choix de l'attaque par l'ennemi ⏲️ 10m
 
 Maintenant, commençons le travail de choix des attaques.
 Le plus simple est probablement celui de l'ennemi,
@@ -681,7 +681,7 @@ catch (const std::range_error e) {
 > A partir de maintenant, je vais tricher et ajouter un nombre déraisonnable de HP à mon Polymon, afin de réaliser des tests plus complets.
 > Cela peut se faire avec un simple `this->_player.damageTaken(-10000); // on triche` à l'initialisation du `Game`.
 
-### 4.4 - Choix de l'attaque par le joueur
+### 4.4 - Choix de l'attaque par le joueur ⏲️ 10m
 
 Il ne me reste plus qu'à ajouter le choix de l'utilisateur quant à l'action qu'il souhaite effectuer.
 On va ajouter une méthode `playerTurn()`.
@@ -778,7 +778,7 @@ void Game::playerTurn() {
 
 ## 5.0 - La suite
 
-### 5.1 - Cohérence
+### 5.1 - Cohérence ⏲️ 5m
 
 Il reste un point d'amélioration : l'ennemi continue à attaquer, même si ses HPs sont à zéro.
 Qu'à cela ne tienne :
@@ -806,4 +806,9 @@ int Game::jouerTour() {
 
 Des éléments sont améliorables, mais nous avons réalisé l'intégralité de la partie du jeu de base.
 
+## 6.0 - Partie Ajouts
+
+### 6.1 - Coups critiques
+
+5% de chances de réussite signifie que sur un nombre aléatoire de 0 à 100, 5 ou moins est un succès.
 
