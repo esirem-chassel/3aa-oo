@@ -875,7 +875,7 @@ void Game::tryAttack(Polymon* src, Polymon* trg, Ability attack, bool foeAgainst
 };
 ```
 
-### 6.2 - Ultimate
+### 6.2 - Ultimate ⏲️ 30m
 
 Rajoutons donc notre classe `Ultimate`.
 Celle-ci est une `Ability`, mais sans possibilité de coup critique, et sans élément.
