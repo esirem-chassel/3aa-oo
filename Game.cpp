@@ -87,44 +87,35 @@ void Game::playerTurn() {
     } while ((userChoice > 0) && (userChoice > playerAbilities.size()));
     if (userChoice >= 0) {
         Ability playerUsed = playerAbilities[userChoice];
-        int pointsUsedPlayer = playerUsed.getPoints();
-
-        try {
-            std::cout << "Vous utilisez " << playerUsed.getName() << " !" << std::endl;
-            this->_player.usePoints(pointsUsedPlayer);
-            int damageDone = playerUsed.getDamage();
-            std::cout << "Vous infligez " << std::to_string(damageDone) << " ! ";
-            this->_against.damageTaken(damageDone);
-            std::cout << "(HP restants : " << std::to_string(this->_against.getHp()) << ")" << std::endl;
-        }
-        catch (const std::range_error e) { // should never happen !
-            std::cout << "Votre Polymon est a court d'energie ("
-                << std::to_string(this->_player.getPoints())
-                << " / "
-                << std::to_string(pointsUsedPlayer)
-                << ") !" << std::endl;
-        }
+        this->tryAttack(&this->_player, &this->_against, playerUsed, false);
     }
 };
 
 void Game::foeTurn() {
     std::vector<Ability> foeAbilities = this->_against.getAttacks();
     Ability foeUsed = this->_against.getBestAbility();
-    int pointsUsedAgainst = foeUsed.getPoints();
+    this->tryAttack(&this->_against, &this->_player, foeUsed, true);
+};
+
+void Game::tryAttack(Polymon* src, Polymon* trg, Ability attack, bool foeAgainstPlayer) {
+    std::string srcName = foeAgainstPlayer ? "Le polymon adverse" : "Votre polymon";
+    std::string trgName = foeAgainstPlayer ? "Votre polymon" : "Le polymon adverse";
+
+    int pointsUsed = attack.getPoints();
 
     try {
-        std::cout << "Votre adversaire utilise " << foeUsed.getName() << " !" << std::endl;
-        this->_against.usePoints(pointsUsedAgainst);
-        int damageTaken = foeUsed.getDamage();
-        std::cout << "Vous prenez " << std::to_string(damageTaken) << " ! ";
-        this->_player.damageTaken(damageTaken);
-        std::cout << "(HP restants : " << std::to_string(this->_player.getHp()) << ")" << std::endl;
+        std::cout << srcName << " utilise " << attack.getName() << " !" << std::endl;
+        src->usePoints(pointsUsed);
+        int damageTaken = attack.getDamage();
+        std::cout << trgName << " prends " << std::to_string(damageTaken) << " ! ";
+        trg->damageTaken(damageTaken);
+        std::cout << "(HP restants : " << std::to_string(trg->getHp()) << ")" << std::endl;
     }
     catch (const std::range_error e) {
-        std::cout << "Le polymon adverse est a court d'energie ("
-            << std::to_string(this->_against.getPoints())
+        std::cout << srcName << " est a court d'energie ("
+            << std::to_string(src->getPoints())
             << " / "
-            << std::to_string(pointsUsedAgainst)
+            << std::to_string(pointsUsed)
             << ") !" << std::endl;
     }
 };

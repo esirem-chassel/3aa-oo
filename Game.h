@@ -17,5 +17,6 @@ private:
 	int _manche = 0;
 	void playerTurn();
 	void foeTurn();
+	void tryAttack(Polymon* src, Polymon* trg, Ability attack, bool foeAgainstPlayer);
 };
 

@@ -808,7 +808,39 @@ Des éléments sont améliorables, mais nous avons réalisé l'intégralité de 
 
 ## 6.0 - Partie Ajouts
 
-### 6.1 - Coups critiques
+### 6.1 - Coups critiques ⏲️ 15m
+
+On avait anticipé la création d'une méthode `tryAttack`, il est temps de l'implémenter.
+Comme on modifie les Polymon, on va passer des pointeurs et non des copies.
+
+```cpp
+void tryAttack(Polymon* src, Polymon* trg, Ability attack, bool foeAgainstPlayer);
+```
+
+```cpp
+void Game::tryAttack(Polymon* src, Polymon* trg, Ability attack, bool foeAgainstPlayer) {
+    std::string srcName = foeAgainstPlayer ? "Le polymon adverse" : "Votre polymon";
+    std::string trgName = foeAgainstPlayer ? "Votre polymon" : "Le polymon adverse";
+
+    int pointsUsed = attack.getPoints();
+
+    try {
+        std::cout << srcName << " utilise " << attack.getName() << " !" << std::endl;
+        src->usePoints(pointsUsed);
+        int damageTaken = attack.getDamage();
+        std::cout << trgName << " prends " << std::to_string(damageTaken) << " ! ";
+        trg->damageTaken(damageTaken);
+        std::cout << "(HP restants : " << std::to_string(trg->getHp()) << ")" << std::endl;
+    }
+    catch (const std::range_error e) {
+        std::cout << srcName << " est a court d'energie ("
+            << std::to_string(src->getPoints())
+            << " / "
+            << std::to_string(pointsUsed)
+            << ") !" << std::endl;
+    }
+};
+```
 
 5% de chances de réussite signifie que sur un nombre aléatoire de 0 à 100, 5 ou moins est un succès.
-
+Modifions notre méthode !
