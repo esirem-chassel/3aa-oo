@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include "Element.h"
 #include "Ability.h"
 #include "Ultimate.h"
 
@@ -9,8 +10,9 @@ class Polymon
 {
 public:
 	Polymon() = default;
-	Polymon(std::string name, int speed, int hp);
+	Polymon(std::string name, int speed, int hp, Element* element);
 	void addAttack(std::string name, int points, int damage);
+	void addAttack(std::string name, int points, int damage, Element* element);
 	void addUltimate(std::string name, int points, int damage);
 	std::string getName() const;
 	int getSpeed() const;
@@ -23,11 +25,13 @@ public:
 	void damageTaken(int taken);
 	void autoHeal();
 	Ability* getBestAbility();
+	Element* getElement() const;
 private:
 	std::string _name;
 	int _speed;
 	int _hp;
 	int _points = 0;
 	std::vector<Ability*> _attacks = std::vector<Ability*>();
+	Element* _element = nullptr;
 };
 

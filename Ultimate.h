@@ -6,5 +6,6 @@ class Ultimate : public Ability
 public:
 	Ultimate(std::string name, int points, int damage);
 	bool canCrit() const override;
+	void setElement(Element* element) {};
 };
 

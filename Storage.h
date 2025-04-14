@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <ctime>
+#include "Element.h"
 #include "Polymon.h"
 
 class Storage

@@ -111,6 +111,17 @@ void Game::tryAttack(Polymon* src, Polymon* trg, Ability* attack, bool foeAgains
             std::cout << "Coup critique ! ";
             damageTaken *= 1.5;
         }
+        Element* abilityElement = attack->getElement();
+        if (nullptr != abilityElement) {
+            if (abilityElement->isStrongAgainst(trg->getElement())) {
+                std::cout << " C'est tres efficace ! ";
+                damageTaken *= 2;
+            }
+            else if (abilityElement->isWeakAgainst(trg->getElement())) {
+                std::cout << " C'est peu efficace... ";
+                damageTaken *= 0.5;
+            }
+        }
         std::cout << trgName << " prends " << std::to_string(damageTaken) << " ! ";
         trg->damageTaken(damageTaken);
         std::cout << "(HP restants : " << std::to_string(trg->getHp()) << ")" << std::endl;

@@ -949,4 +949,194 @@ void Game::tryAttack(Polymon* src, Polymon* trg, Ability* attack, bool foeAgains
 };
 ```
 
+### 6.3 - Elements ⏲️ 30m
+
+Commençons par créer notre classe Element.
+Celle-ci contiendra un nom et un pointeur vers un élément fort et un élément fort.
+Nous avons une problématique simple : l'élément doit exister quand on y fait référence.
+Cela implique deux choses :
+- On ne peut inclure les éléments fort/faible dans le constructeur
+- On utilisera des pointeurs
+
+On ne devrait pas avoir besoin davantage de méthodes que celles déclarés ci-dessous :
+```cpp
+#pragma once
+#include <string>
+class Element
+{
+private:
+	std::string _name;
+	Element* _strongAgainst = nullptr;
+	Element* _weakAgainst = nullptr;
+public:
+	Element(std::string name) : _name(name) {};
+	std::string getName();
+	void setStrength(Element* strong);
+	void setWeakness(Element* weak);
+	bool isStrongAgainst(Element* other);
+	bool isWeakAgainst(Element* other);
+};
+```
+
+Définition :
+```cpp
+#include "Element.h"
+
+std::string Element::getName() {
+	return this->_name;
+};
+
+void Element::setStrength(Element* strong) {
+	this->_strongAgainst = strong;
+};
+
+void Element::setWeakness(Element* weak) {
+	this->_weakAgainst = weak;
+};
+
+bool Element::isStrongAgainst(Element* other) {
+	return (this->_strongAgainst->getName() == other->getName());
+};
+
+bool Element::isWeakAgainst(Element* other) {
+	return (this->_weakAgainst->getName() == other->getName());
+};
+```
+
+Maintenant, nous allons avoir un souci : comment référencer ces éléments.
+Nous avons besoin d'accéder à l'élément X depuis n'importe où, et cet élément doit être le même,
+sinon nous allons instancier et dupliquer des objets partout.
+Nous pouvons nous inspirer du pattern Fingerprint
+pour déclarer Element comme maintenant, statiquement,
+une liste d'Element référencés par leur nom !
+La classe unordered_map nécessite quelques vérifications sur [la documentation](https://en.cppreference.com/w/cpp/container/unordered_map/find).
+
+Déclaration :
+```cpp
+#pragma once
+#include <string>
+#include <unordered_map>
+
+class Element
+{
+private:
+	std::string _name;
+	Element* _strongAgainst = nullptr;
+	Element* _weakAgainst = nullptr;
+public:
+	static std::unordered_map<std::string, Element*> _elements;
+	static Element* get(std::string name);
+	static Element* forge(std::string name);
+	Element(std::string name) : _name(name) {};
+	std::string getName();
+	void setStrength(Element* strong);
+	void setWeakness(Element* weak);
+	bool isStrongAgainst(Element* other);
+	bool isWeakAgainst(Element* other);
+};
+```
+
+Définition :
+```cpp
+#include "Element.h"
+
+std::unordered_map<std::string, Element*> Element::_elements = std::unordered_map<std::string, Element*>();
+
+Element* Element::get(std::string name) {
+	Element* r = nullptr;
+	auto e = Element::_elements.find(name);
+	if (e != Element::_elements.end()) {
+		r = e->second;
+	}
+	return r;
+};
+
+Element* Element::forge(std::string name) {
+	Element* e = new Element(name);
+	Element::_elements.emplace(name, e);
+	return e;
+};
+
+std::string Element::getName() {
+	return this->_name;
+};
+
+void Element::setStrength(Element* strong) {
+	this->_strongAgainst = strong;
+};
+
+void Element::setWeakness(Element* weak) {
+	this->_weakAgainst = weak;
+};
+
+bool Element::isStrongAgainst(Element* other) {
+	return (this->_strongAgainst->getName() == other->getName());
+};
+
+bool Element::isWeakAgainst(Element* other) {
+	return (this->_weakAgainst->getName() == other->getName());
+};
+```
+
+On ajoute également l'élément dans le constructeur de Polymon, ainsi que le getter associé.
+On va générer quelques données dans Storage :
+
+```cpp
+Element* e_feu = Element::forge("feu");
+Element* e_eau = Element::forge("eau");
+Element* e_glace = Element::forge("glace");
+Element* e_terre = Element::forge("terre");
+Element* e_foudre = Element::forge("foudre");
+Element* e_air = Element::forge("air");
+e_feu->setStrength(e_glace);
+e_feu->setWeakness(e_eau);
+e_eau->setStrength(e_foudre);
+e_eau->setStrength(e_feu);
+e_glace->setStrength(e_eau);
+e_terre->setStrength(e_foudre);
+e_foudre->setStrength(e_eau);
+e_foudre->setStrength(e_air);
+e_foudre->setWeakness(e_terre);
+e_air->setStrength(e_feu);
+```
+
+Et on effectue l'ajout sur Ability, en tant que propriété `nullptr` par défaut.
+On garde le constructeur d'Ability tel quel, on ajoute un setter.
+
+```cpp
+void Ability::setElement(Element* element) {
+	this->_element = element;
+};
+
+Element* Ability::getElement() const {
+	return this->_element;
+};
+```
+
+Comme Ultimate ne possède pas d'Element, nous allons écraser son setter.
+
+```cpp
+class Ultimate : public Ability
+{
+public:
+	Ultimate(std::string name, int points, int damage);
+	bool canCrit() const override;
+	void setElement(Element* element) {};
+};
+```
+
+Enfin, nous allons prendre en compte les éléments dans notre classe `Game` :
+```cpp
+Element* abilityElement = attack->getElement();
+if (nullptr != abilityElement) {
+    if (abilityElement->isStrongAgainst(trg->getElement())) {
+        std::cout << " C'est tres efficace ! ";
+        damageTaken *= 2;
+    }
+    else if (abilityElement->isWeakAgainst(trg->getElement())) {
+        std::cout << " C'est peu efficace... ";
+        damageTaken *= 0.5;
+    }
+}
+```
 

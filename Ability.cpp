@@ -15,3 +15,11 @@ int Ability::getDamage() const {
 bool Ability::canCrit() const {
 	return true;
 };
+
+void Ability::setElement(Element* element) {
+	this->_element = element;
+};
+
+Element* Ability::getElement() const {
+	return this->_element;
+};

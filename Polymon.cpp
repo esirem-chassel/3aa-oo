@@ -1,13 +1,20 @@
 #include "Polymon.h"
 
-Polymon::Polymon(std::string name, int speed, int hp) {
+Polymon::Polymon(std::string name, int speed, int hp, Element* element) {
 	this->_name = name;
 	this->_speed = speed;
 	this->_hp = hp;
+	this->_element = element;
 };
 
 void Polymon::addAttack(std::string name, int points, int damage) {
 	this->_attacks.push_back(new Ability(name, points, damage));
+};
+
+void Polymon::addAttack(std::string name, int points, int damage, Element* element) {
+	Ability* a = new Ability(name, points, damage);
+	a->setElement(element);
+	this->_attacks.push_back(a);
 };
 
 void Polymon::addUltimate(std::string name, int points, int damage) {
@@ -32,6 +39,10 @@ std::vector<Ability*> Polymon::getAttacks() const {
 
 int Polymon::getPoints() const {
 	return this->_points;
+};
+
+Element* Polymon::getElement() const {
+	return this->_element;
 };
 
 void Polymon::stackSpeed() {
